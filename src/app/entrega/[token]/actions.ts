@@ -6,7 +6,7 @@ import { getSolicitudByToken, updateSolicitud } from "@/lib/store";
 const MAX_BYTES = 15 * 1024 * 1024; // 15 MB, suficiente para esta prueba
 
 export async function entregarMaterial(token: string, formData: FormData) {
-  const solicitud = getSolicitudByToken(token);
+  const solicitud = await getSolicitudByToken(token);
   if (!solicitud) return { error: "No se encontró la solicitud." };
 
   const file = formData.get("archivo");
@@ -18,7 +18,7 @@ export async function entregarMaterial(token: string, formData: FormData) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  updateSolicitud(solicitud.id, {
+  await updateSolicitud(solicitud.id, {
     estado: "recibido",
     archivo: {
       nombreOriginal: file.name,

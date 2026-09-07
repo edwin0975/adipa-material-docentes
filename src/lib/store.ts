@@ -1,15 +1,32 @@
-import { randomUUID } from "crypto";
+import { createHash } from "crypto";
+import { Redis } from "@upstash/redis";
 import { CLASES_SEED, PROGRAMA } from "./seed-data";
 import type { Estado, Solicitud, TipoMaterial } from "./types";
 
-// Store en memoria del proceso del servidor. Ver BRIEF.md, sección
-// "Fuera de alcance": esto es intencional para esta prueba técnica — no
-// hay base de datos real, el estado se reinicia si el servidor se
-// reinicia o se vuelve a desplegar. Se usa globalThis para sobrevivir al
-// hot-reload de `next dev` y a llamadas repetidas dentro de la misma
-// instancia de servidor.
+// Almacenamiento de las solicitudes.
+//
+// Preferido: si el proyecto tiene conectada una base de datos Redis en
+// Vercel (Storage → Create Database → Upstash for Redis, o el antiguo
+// Vercel KV), se usa esa — persiste de verdad entre despliegues y entre
+// las distintas instancias del servidor.
+//
+// Si no hay ninguna conectada (por ejemplo en desarrollo local), se cae a
+// un store en memoria del proceso (ver BRIEF.md, "Fuera de alcance"): en
+// ese modo el estado puede reiniciarse o no compartirse entre instancias,
+// aceptable solo para probar localmente, no en producción.
 declare global {
   var __solicitudesStore: Solicitud[] | undefined;
+}
+
+const REDIS_KEY = "adipa:material-docentes:solicitudes";
+
+function getRedis(): Redis | null {
+  const url =
+    process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+  const token =
+    process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  return new Redis({ url, token });
 }
 
 function addDays(iso: string, dias: number): string {
@@ -23,6 +40,29 @@ function fakeArchivo(nombreOriginal: string, tipoMime: string, fechaSubida: stri
     `Archivo de ejemplo para la prueba técnica de ADIPA.\nNombre: ${nombreOriginal}\nEsto simula el contenido real entregado por el docente.`,
   ).toString("base64");
   return { nombreOriginal, tipoMime, fechaSubida, contenidoBase64: contenido };
+}
+
+// IDs y tokens deterministas (no aleatorios): así, aunque el store en
+// memoria se vuelva a sembrar en una instancia distinta del servidor, una
+// misma solicitud (clase + docente + tipo) siempre cae en el mismo id y el
+// mismo link — evita que los links de entrega dejen de funcionar.
+function slug(texto: string): string {
+  return texto
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // quita tildes tras normalizar
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function idDeterminista(modulo: string, clase: string, docente: string, tipo: TipoMaterial): string {
+  return slug(`${modulo}-${clase}-${docente}-${tipo}`);
+}
+
+function tokenDeterminista(id: string): string {
+  // No es criptográficamente secreto (esto es una prueba técnica), pero
+  // no es adivinable a simple vista y es estable entre reinicios.
+  return createHash("sha256").update(`entrega:${id}`).digest("hex").slice(0, 32);
 }
 
 function crearSolicitud(params: {
@@ -41,10 +81,11 @@ function crearSolicitud(params: {
   const fechaLimite =
     tipoMaterial === "apoyo" ? addDays(fechaClase, -7) : addDays(fechaClase, 1);
   const ventanaInicio = tipoMaterial === "ppt" ? addDays(fechaClase, -2) : undefined;
+  const id = idDeterminista(params.modulo, params.clase, params.docente, tipoMaterial);
 
   return {
-    id: randomUUID(),
-    linkToken: randomUUID(),
+    id,
+    linkToken: tokenDeterminista(id),
     programa: params.programa,
     modulo: params.modulo,
     clase: params.clase,
@@ -97,8 +138,8 @@ function seedSolicitudes(): Solicitud[] {
           const ext = tipoMaterial === "ppt" ? "pptx" : "pdf";
           const nombreOriginal =
             tipoMaterial === "ppt"
-              ? `presentacion_${docente.toLowerCase().replace(/\s+/g, "_")}.${ext}`
-              : `material_apoyo_${c.clase.toLowerCase().replace(/\s+/g, "_")}.${ext}`;
+              ? `presentacion_${slug(docente)}.${ext}`
+              : `material_apoyo_${slug(c.clase)}.${ext}`;
           archivo = fakeArchivo(
             nombreOriginal,
             tipoMaterial === "ppt"
@@ -132,33 +173,67 @@ function seedSolicitudes(): Solicitud[] {
   return solicitudes;
 }
 
-function getStore(): Solicitud[] {
+function getMemoryStore(): Solicitud[] {
   if (!global.__solicitudesStore) {
     global.__solicitudesStore = seedSolicitudes();
   }
   return global.__solicitudesStore;
 }
 
-export function listSolicitudes(): Solicitud[] {
-  return [...getStore()].sort((a, b) => a.fechaLimite.localeCompare(b.fechaLimite));
+async function readAll(): Promise<Solicitud[]> {
+  const redis = getRedis();
+  if (!redis) return getMemoryStore();
+
+  const data = await redis.get<Solicitud[]>(REDIS_KEY);
+  if (data && data.length > 0) return data;
+
+  const seeded = seedSolicitudes();
+  await redis.set(REDIS_KEY, seeded);
+  return seeded;
 }
 
-export function getSolicitud(id: string): Solicitud | undefined {
-  return getStore().find((s) => s.id === id);
+async function writeAll(lista: Solicitud[]): Promise<void> {
+  const redis = getRedis();
+  if (!redis) {
+    global.__solicitudesStore = lista;
+    return;
+  }
+  await redis.set(REDIS_KEY, lista);
 }
 
-export function getSolicitudByToken(token: string): Solicitud | undefined {
-  return getStore().find((s) => s.linkToken === token);
+export async function listSolicitudes(): Promise<Solicitud[]> {
+  const all = await readAll();
+  return [...all].sort((a, b) => a.fechaLimite.localeCompare(b.fechaLimite));
 }
 
-export function updateSolicitud(id: string, patch: Partial<Solicitud>): Solicitud | undefined {
-  const store = getStore();
-  const idx = store.findIndex((s) => s.id === id);
+export async function getSolicitud(id: string): Promise<Solicitud | undefined> {
+  const all = await readAll();
+  return all.find((s) => s.id === id);
+}
+
+export async function getSolicitudByToken(token: string): Promise<Solicitud | undefined> {
+  const all = await readAll();
+  return all.find((s) => s.linkToken === token);
+}
+
+export async function updateSolicitud(
+  id: string,
+  patch: Partial<Solicitud>,
+): Promise<Solicitud | undefined> {
+  const all = await readAll();
+  const idx = all.findIndex((s) => s.id === id);
   if (idx === -1) return undefined;
-  store[idx] = { ...store[idx], ...patch };
-  return store[idx];
+  all[idx] = { ...all[idx], ...patch };
+  await writeAll(all);
+  return all[idx];
 }
 
-export function resetStore(): void {
-  global.__solicitudesStore = seedSolicitudes();
+export async function resetStore(): Promise<void> {
+  const redis = getRedis();
+  const seeded = seedSolicitudes();
+  if (redis) {
+    await redis.set(REDIS_KEY, seeded);
+  } else {
+    global.__solicitudesStore = seeded;
+  }
 }

@@ -5,7 +5,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const solicitud = getSolicitud(id);
+  const solicitud = await getSolicitud(id);
 
   if (!solicitud?.archivo) {
     return new Response("Archivo no encontrado", { status: 404 });

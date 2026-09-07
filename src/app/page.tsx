@@ -26,7 +26,7 @@ export default async function TableroPage({
   searchParams: Promise<{ estado?: string; tipo?: string }>;
 }) {
   const { estado, tipo } = await searchParams;
-  const todas = listSolicitudes();
+  const todas = await listSolicitudes();
   const solicitudes = todas.filter((s) => {
     if (estado && s.estado !== estado) return false;
     if (tipo && s.tipoMaterial !== tipo) return false;

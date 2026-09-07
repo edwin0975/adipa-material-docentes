@@ -9,22 +9,22 @@ function revalidar(id: string) {
 }
 
 export async function marcarContactadoWhatsapp(id: string) {
-  updateSolicitud(id, { estado: "contactado_whatsapp" });
+  await updateSolicitud(id, { estado: "contactado_whatsapp" });
   revalidar(id);
 }
 
 export async function marcarEscaladoDireccion(id: string) {
-  updateSolicitud(id, { estado: "escalado_direccion" });
+  await updateSolicitud(id, { estado: "escalado_direccion" });
   revalidar(id);
 }
 
 export async function marcarExcepcion(id: string) {
-  updateSolicitud(id, { estado: "excepcion" });
+  await updateSolicitud(id, { estado: "excepcion" });
   revalidar(id);
 }
 
 export async function marcarListoYSubirDrive(id: string, nombreFinal?: string) {
-  const solicitud = getSolicitud(id);
+  const solicitud = await getSolicitud(id);
   if (!solicitud) return { error: "No se encontró la solicitud." };
 
   if (solicitud.tipoMaterial === "ppt" && !nombreFinal?.trim()) {
@@ -36,7 +36,7 @@ export async function marcarListoYSubirDrive(id: string, nombreFinal?: string) {
 
   // Simulado: no se llama a la API real de Google Drive en esta versión
   // (ver BRIEF.md, "Fuera de alcance").
-  updateSolicitud(id, {
+  await updateSolicitud(id, {
     estado: "subido_drive",
     nombreFinal: solicitud.tipoMaterial === "ppt" ? nombreFinal?.trim() : solicitud.nombreFinal,
   });

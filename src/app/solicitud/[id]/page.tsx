@@ -11,7 +11,7 @@ export default async function DetalleSolicitudPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const solicitud = getSolicitud(id);
+  const solicitud = await getSolicitud(id);
   if (!solicitud) notFound();
 
   const linkDocente = `/entrega/${solicitud.linkToken}`;

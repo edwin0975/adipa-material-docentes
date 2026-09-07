@@ -10,7 +10,7 @@ export default async function EntregaPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const solicitud = getSolicitudByToken(token);
+  const solicitud = await getSolicitudByToken(token);
   if (!solicitud) notFound();
 
   return (
