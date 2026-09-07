@@ -137,12 +137,7 @@ material cuando le corresponde.
   él.
 - Cuentas o login para docentes — el acceso es solo vía link único no
   adivinable por solicitud, sin contraseña ni registro.
-- Persistencia en una base de datos real — el estado vive en memoria del
-  servidor mientras dure el proceso; se reinicia si el servidor se reinicia
-  o se vuelve a desplegar. Aceptable para esta prueba, no para producción.
-
-## Preguntas abiertas
-
-Ninguna pendiente — las dos dudas que quedaban (docentes múltiples por
-clase, y qué pasa si ni dirección consigue el material) se resolvieron y
-ya están incorporadas en las reglas de negocio de arriba.
+- Persistencia en una base de datos "de verdad" con modelado relacional,
+  migraciones, backups, etc. — se usa Redis (Upstash/Vercel KV) como una
+  única lista guardada bajo una llave, suficiente para este volumen de
+  datos. Si no hay ninguna base conectada, la app cae
