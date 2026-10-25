@@ -62,33 +62,33 @@ La fase actual es la 1. Las demás esperan la aprobación del brief y los acceso
 
 ## Plazos estimados
 
-Las fechas suponen que el trabajo real empieza después del 12 de noviembre, con el brief ya aprobado, y que se trabaja un domingo por semana, desde el 15 de noviembre. Cada domingo se hace un paso pequeño. Si un acceso llega tarde, la fase se corre al siguiente domingo.
+Las fechas suponen que el trabajo real empieza después del 12 de noviembre, con el brief ya aprobado, y que se trabaja un viernes por semana, desde el 13 de noviembre. Cada viernes se hace un paso pequeño. Si un acceso llega tarde, la fase se corre al siguiente viernes.
 
-| Fase | Domingos de trabajo | Acceso necesario antes del | Termina el domingo |
+| Fase | Viernes de trabajo | Acceso necesario antes del | Termina el viernes |
 | --- | --- | --- | --- |
-| 1 · Tablero y revisión | 3 | Aprobación del brief | 29 nov 2026 |
-| 2 · Lectura de monday | 2 | 6 dic 2026 (lectura y edición de Gestión Académica, y ser administrador del tablero) | 13 dic 2026 |
-| 3 · Drive | 3 | 20 dic 2026 (Drive de Operaciones y edición de Gestión Académica) | 3 ene 2027 |
-| 4 · Aula (Moodle) | 3 | 10 ene 2027 (token del servicio web) | 24 ene 2027 |
-| 5 · PPT a monitores | 2 | 31 ene 2027 (edición de la tabla de monitores) | 7 feb 2027 |
-| Cierre | 1 | Todas las fases validadas | 14 feb 2027 |
+| 1 · Tablero y revisión | 3 | Aprobación del brief | 27 nov 2026 |
+| 2 · Lectura de monday | 2 | 4 dic 2026 (lectura y edición de Gestión Académica, y ser administrador del tablero) | 11 dic 2026 |
+| 3 · Drive | 3 | 18 dic 2026 (Drive de Operaciones y edición de Gestión Académica) | 31 dic 2026 |
+| 4 · Aula (Moodle) | 3 | 8 ene 2027 (token del servicio web) | 22 ene 2027 |
+| 5 · PPT a monitores | 2 | 29 ene 2027 (edición de la tabla de monitores) | 5 feb 2027 |
+| Cierre | 1 | Todas las fases validadas | 12 feb 2027 |
 
 La Fase 4 es la más incierta, porque depende de quién pueda generar el token en Moodle.
 
 ## Cronograma
 
-Con un domingo de trabajo por semana desde el 15 de noviembre de 2026, el proyecto cierra el 14 de febrero de 2027. En el brief vivo (Claude Docs) y en el PDF el cronograma es un diagrama de Gantt; aquí va su equivalente en texto.
+Con un viernes de trabajo por semana desde el 13 de noviembre de 2026, el proyecto cierra el 12 de febrero de 2027. En el brief vivo (Claude Docs) y en el PDF el cronograma es un diagrama de Gantt; aquí va su equivalente en texto.
 
-| Domingo | Fase en trabajo |
+| Viernes | Fase en trabajo |
 | --- | --- |
-| 15, 22 y 29 nov | Fase 1 · Tablero y revisión |
-| 6 y 13 dic | Fase 2 · Lectura de monday |
-| 20 y 27 dic, 3 ene | Fase 3 · Drive |
-| 10, 17 y 24 ene | Fase 4 · Aula (Moodle) |
-| 31 ene y 7 feb | Fase 5 · PPT a monitores |
-| 14 feb | Cierre y validación |
+| 13, 20 y 27 nov | Fase 1 · Tablero y revisión |
+| 4 y 11 dic | Fase 2 · Lectura de monday |
+| 18 y 24 dic, 31 dic | Fase 3 · Drive |
+| 8, 15 y 22 ene | Fase 4 · Aula (Moodle) |
+| 29 ene y 5 feb | Fase 5 · PPT a monitores |
+| 12 feb | Cierre y validación |
 
-Cada fila es una semana y el trabajo se hace el domingo de esa semana, con un paso pequeño por domingo. Las fases esperan su acceso: si llega tarde, la fase pasa al siguiente domingo. Si el brief se aprueba después del 12 de noviembre, todas las fechas se corren las mismas semanas.
+Cada fila es una semana y el trabajo se hace el viernes de esa semana, con un paso pequeño por viernes. Las fases esperan su acceso: si llega tarde, la fase pasa al siguiente viernes. Las semanas del 25 de diciembre y del 1 de enero caen en viernes feriado, así que ese trabajo se hace el jueves anterior (24 y 31 de diciembre). Si el brief se aprueba después del 12 de noviembre, todas las fechas se corren las mismas semanas.
 
 ## Seguimiento del proyecto
 
