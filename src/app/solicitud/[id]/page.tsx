@@ -19,18 +19,18 @@ export default async function DetalleSolicitudPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/" className="text-sm text-slate-500 hover:underline">
+        <Link href="/" className="text-sm text-muted hover:underline">
           ← Volver al tablero
         </Link>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
+      <div className="adipa-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold text-slate-900">
+            <h1 className="text-lg font-semibold text-brand-navy">
               {solicitud.nombreClase}
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted">
               {solicitud.programa} · {solicitud.modulo} · {solicitud.clase}
             </p>
           </div>
@@ -43,26 +43,26 @@ export default async function DetalleSolicitudPage({
 
         <dl className="mt-6 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-slate-400">Docente</dt>
-            <dd className="font-medium text-slate-900">{solicitud.docente}</dd>
+            <dt className="text-subtle">Docente</dt>
+            <dd className="font-medium text-brand-navy">{solicitud.docente}</dd>
           </div>
           <div>
-            <dt className="text-slate-400">Tipo de material</dt>
-            <dd className="font-medium text-slate-900">
+            <dt className="text-subtle">Tipo de material</dt>
+            <dd className="font-medium text-brand-navy">
               {TIPO_LABEL[solicitud.tipoMaterial]}
             </dd>
           </div>
           <div>
-            <dt className="text-slate-400">Fecha de la clase</dt>
-            <dd className="font-medium text-slate-900">
+            <dt className="text-subtle">Fecha de la clase</dt>
+            <dd className="font-medium text-brand-navy">
               {formatFecha(solicitud.fechaClase)}
             </dd>
           </div>
           <div>
-            <dt className="text-slate-400">
+            <dt className="text-subtle">
               {solicitud.tipoMaterial === "ppt" ? "Ventana de entrega" : "Fecha límite"}
             </dt>
-            <dd className="font-medium text-slate-900">
+            <dd className="font-medium text-brand-navy">
               {solicitud.tipoMaterial === "ppt" && solicitud.ventanaInicio
                 ? `${formatFecha(solicitud.ventanaInicio)} — ${formatFecha(solicitud.fechaLimite)}`
                 : formatFecha(solicitud.fechaLimite)}
@@ -71,54 +71,62 @@ export default async function DetalleSolicitudPage({
         </dl>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="text-sm font-semibold text-slate-900">
+      <div className="adipa-card p-6">
+        <h2 className="text-sm font-semibold text-brand-navy">
           Material entregado
         </h2>
         {solicitud.archivo ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-md bg-slate-50 px-4 py-3 text-sm">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-adipa-control bg-brand-soft px-4 py-3 text-sm">
             <div>
-              <p className="font-medium text-slate-900">
+              <p className="font-medium text-brand-navy">
                 {solicitud.archivo.nombreOriginal}
               </p>
-              <p className="text-slate-400">
+              <p className="text-subtle">
                 Entregado el {formatFechaHora(solicitud.archivo.fechaSubida)}
               </p>
             </div>
             <a
               href={`/api/archivo/${solicitud.id}`}
-              className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-white"
+              className="rounded-adipa-control border border-line-strong px-3 py-1.5 font-medium text-ink hover:bg-white"
             >
               Descargar
             </a>
           </div>
         ) : (
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-subtle">
             Aún no hay ningún archivo entregado por el docente.
+          </p>
+        )}
+        {solicitud.motivoRechazo && !solicitud.archivo && (
+          <p className="mt-3 rounded-adipa-control bg-danger/10 px-3 py-2 text-sm text-ink">
+            <span className="font-medium">Último archivo rechazado</span>
+            {solicitud.fechaRechazo
+              ? ` el ${formatFechaHora(solicitud.fechaRechazo)}`
+              : ""}
+            : {solicitud.motivoRechazo}
           </p>
         )}
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="text-sm font-semibold text-slate-900">Acciones</h2>
+      <div className="adipa-card p-6">
+        <h2 className="text-sm font-semibold text-brand-navy">Acciones</h2>
         <div className="mt-3">
           <AccionesSolicitud solicitud={solicitud} />
         </div>
       </div>
 
-      <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6">
-        <h2 className="text-sm font-semibold text-slate-900">
+      <div className="rounded-adipa-card border border-dashed border-line-strong bg-white p-6">
+        <h2 className="text-sm font-semibold text-brand-navy">
           Link de entrega del docente
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          En producción este link lo recibe el docente por el correo
-          automático corporativo. Para probar la app, ábrelo tú (o cópialo en
-          otro dispositivo) y entrégalo como si fueras el docente.
+        <p className="mt-1 text-sm text-muted">
+          Este es el link que recibe el docente para entregar su material.
+          Puedes abrirlo para ver lo que ve el docente.
         </p>
         <p className="mt-3">
           <Link
             href={linkDocente}
-            className="break-all text-sm font-medium text-slate-900 underline"
+            className="break-all text-sm font-medium text-brand-navy underline"
           >
             {linkDocente}
           </Link>

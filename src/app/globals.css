@@ -1,31 +1,71 @@
 @import "tailwindcss";
 
+/*
+  Tokens de ADIPA — fuente: DESIGN.md (Manual de marca oficial).
+  Colores corporativos, secundarios y tokens de UI. Los marcados como
+  "needs-brand-definition" no tienen equivalente en la paleta oficial y
+  esperan validación del equipo de diseño.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-primary: #704efd;
+  --brand-secondary: #2cb7ff;
+  --brand-surface-soft: #f3f4ff;
+  --brand-navy: #091e42; /* texto fuerte (brand.text.strong) */
+  --brand-sky: #cbe8ff;
+  --brand-lavender: #dfd5ff;
+  --accent-yellow: #ffc728; /* color activo: énfasis puntual, con moderación */
+
+  /* needs-brand-definition (DESIGN.md §15.5) */
+  --ui-ink: #1d1d1d;
+  --ui-muted: #5b6987;
+  --ui-subtle: #8c93a8;
+  --ui-line: #e3e8f3;
+  --ui-line-strong: #9ba7bd;
+  --ui-danger: #d9485f;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
+  --color-brand: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-soft: var(--brand-surface-soft);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-sky: var(--brand-sky);
+  --color-brand-lavender: var(--brand-lavender);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-ink: var(--ui-ink);
+  --color-muted: var(--ui-muted);
+  --color-subtle: var(--ui-subtle);
+  --color-line: var(--ui-line);
+  --color-line-strong: var(--ui-line-strong);
+  --color-danger: var(--ui-danger);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Radios de UI: 4, 6 y 8 px (DESIGN.md §15.4) */
+  --radius-adipa-card: 8px;
+  --radius-adipa-control: 8px;
+
+  /* Poppins es la tipografía principal; Helvetica es el único respaldo de marca */
+  --font-sans: "Poppins", Helvetica, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  background: var(--brand-surface-soft);
+  color: var(--ui-ink);
+  font-family: var(--font-sans);
+}
+
+/* Card estándar de producto digital ADIPA (DESIGN.md §15.4). */
+.adipa-card {
+  background: #ffffff;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(9 30 66 / 0.15);
+}
+.adipa-card-interactive {
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.adipa-card-interactive:hover {
+  border-color: rgb(112 78 253 / 0.24);
+  box-shadow: 0 6px 18px rgb(9 30 66 / 0.08);
 }

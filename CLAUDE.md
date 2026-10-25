@@ -11,15 +11,30 @@ sección "Fuera de alcance".
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS para estilos
-- Sin base de datos externa: el estado (solicitudes de material, sus archivos
-  y su estado) vive en un store en memoria del servidor, sembrado al arrancar
-  con datos de ejemplo (ver `BRIEF.md`). Esto es intencional para esta prueba:
-  se reinicia si el servidor se reinicia, y no persiste entre despliegues.
-  No implementar una base de datos real — eso queda fuera de alcance.
+- Persistencia: el estado (solicitudes de material, sus archivos y su estado)
+  se guarda en Redis (Upstash / Vercel KV) cuando el proyecto tiene una base
+  conectada — ver `src/lib/store.ts` y la nota de la Etapa 3 en `BRIEF.md`.
+  Si no hay ninguna conectada (ej. en desarrollo local), cae a un store en
+  memoria del servidor, sembrado al arrancar con datos de ejemplo; en ese modo
+  el estado se reinicia con el servidor. No se implementa una base de datos
+  relacional "de verdad" (sin modelado, migraciones ni backups) — eso queda
+  fuera de alcance, ver `BRIEF.md`.
+- Integraciones externas (monday, Google Drive, Moodle): son las Fases 2 a 5
+  del brief y se construyen a medida que haya acceso. Sus claves van solo en
+  variables de entorno de Vercel, nunca en el repositorio ni en el chat.
 - Sin autenticación de usuarios (ni para la coordinadora ni para los
   docentes): el acceso del docente es vía un link único no adivinable
   (UUID) por solicitud, sin login.
 - Despliegue: Vercel (preview).
+- Diseño: la app sigue el manual de marca de ADIPA (`DESIGN.md`, que ADIPA
+  entrega aparte y no vive en este repositorio, que es público). Los tokens
+  están en `src/app/globals.css` (colores, radios, card `.adipa-card`) y la
+  tipografía es Poppins (`@fontsource/poppins`, pesos 400 a 700, nunca Extra
+  Bold). No se reconstruye el logo: cuando ADIPA entregue el archivo oficial,
+  se reemplaza el texto del encabezado en `src/app/layout.tsx`.
+- Textos: se usa el glosario de `estilo-comunicativo.md` (también fuera del
+  repo): "docente", "aula" (no "Moodle" de cara al usuario), "presentación de
+  la clase" (no "PPT"), "material de apoyo". Tono formal y cercano.
 
 ## Cómo trabajar en este repo
 
