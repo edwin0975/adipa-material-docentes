@@ -1,143 +1,298 @@
 # Brief · Solicitud de material a los docentes
 
+Versión 7 · propuesta para aprobación de ADIPA · Edwin (Operaciones)
+
+## Resumen
+
+Se propone un tablero único para solicitar, recibir, revisar y autorizar el material de cada clase, que reemplace el seguimiento manual. La propuesta se divide en 5 fases: revisión del material, lectura de las clases desde monday, y envío a Drive, Moodle y monday a medida que haya accesos. Cada fase se construye solo con la aprobación de ADIPA.
+
+## Objetivos y alcance
+
+El objetivo general es que cada material pedido a un docente quede entregado, revisado, respaldado y publicado en el aula sin depender de la memoria ni del correo de una sola persona.
+
+Objetivos específicos:
+
+- Tener un único tablero con el estado del material de cada clase.
+- Revisar antes de publicar: Coordinación autoriza o rechaza lo que sube el docente.
+- Leer clases y fechas directo de monday, para que las reprogramaciones se reflejen sin trabajo manual.
+- Guardar un respaldo ordenado en Drive y publicar el material en Moodle.
+- Marcar el avance en monday sin hacerlo a mano.
+
+El alcance son las 5 fases de la tabla de abajo, para los diplomados activos y por activarse. Lo que no entra en esta versión está en la sección Fuera de alcance.
+
 ## Problema que resuelve
 
-Para cada clase programada de un diplomado, la coordinación académica debe
-conseguir a tiempo dos materiales de cada docente: el material de apoyo (una
-semana antes de la clase) y la presentación/PPT (entre dos días antes y un
-día después de la clase). Hoy el seguimiento es manual: un correo automático
-corporativo avisa al docente, y si no responde, la coordinadora lo contacta
-por correo o WhatsApp para recordarle, y si aun así no entrega, escala a la
-dirección del programa. Una vez recibido, el material se sube a una carpeta
-de Drive (organizada por programa → módulo → tipo de material) y luego a
-Moodle. No hay hoy una vista única de qué está pendiente, contactado,
-escalado o listo por clase y por docente — vive en la memoria y bandeja de
-correo de la coordinadora.
+Hoy pedir el material a cada docente es un proceso manual: vive en la memoria y en el correo de la coordinadora. Depende de que alguien recuerde qué clase viene, a quién escribirle y si ya respondió.
 
-Esta app resuelve dos partes de ese proceso: (1) darle a la coordinadora un
-tablero de seguimiento del estado de cada solicitud de material, y (2)
-darle al docente un lugar simple, sin cuenta ni contraseña, para entregar su
-material cuando le corresponde.
+Si la coordinadora no está, el proceso se cae: no queda registro de quién entregó, qué falta ni qué se subió al aula. Además, nada impide que un docente suba un archivo equivocado sin que nadie lo note antes de que llegue al aula.
 
-## Usuario principal y roles
+## Usuarios y roles
 
-- **Coordinación académica (usuaria principal, ej. Edwin):** ve el tablero
-  de todas las solicitudes, actualiza manualmente el estado cuando contacta
-  por WhatsApp o escala a dirección, revisa el material recibido, ajusta el
-  nombre del PPT y marca la solicitud como lista (lo que dispara la subida
-  simulada a Drive).
-- **Docente:** recibe (fuera de esta app) un correo automático corporativo
-  con un link único a su formulario de entrega; abre el link, sube su
-  archivo, sin necesidad de crear cuenta.
-- **Dirección del programa:** rol de escalamiento fuera de la app — la
-  coordinadora la contacta manualmente cuando ni el correo ni el WhatsApp
-  funcionaron; se asume que la dirección consigue el material.
-- **Sistema de correo automático corporativo (existente, fuera de esta
-  app):** dispara el primer aviso al docente con el link de entrega, según
-  la fecha de la clase.
+| Rol | Qué hace en el flujo |
+| --- | --- |
+| Coordinación (Operaciones) | Usa el tablero, solicita el material, revisa lo entregado y lo autoriza o rechaza. |
+| Docente | Recibe un link único por solicitud y sube su archivo, sin login. |
+| Dirección | Interviene cuando el docente no responde y la solicitud se escala. |
+| Monitor | Acompaña al docente en Zoom; usa la presentación de respaldo de la tabla «Sesión de monitores en vivo». |
+| Sistemas | monday (tabla Gestión Académica, que reúne las tablas madre, y tabla de monitores), Google Drive (respaldo), Moodle (aula) y correo corporativo. |
 
-## Pantallas / piezas (lista, en orden del journey)
+## Fases de construcción
 
-1. **Tablero de seguimiento** (vista de la coordinadora, pantalla principal
-   al entrar a la app): lista todas las solicitudes de material — una fila
-   por combinación de clase + tipo de material — con su estado actual y
-   filtro/orden por programa, módulo, docente o estado.
-2. **Detalle de solicitud** (vista de la coordinadora, se abre desde una fila
-   del tablero): muestra los datos de la clase, el archivo entregado por el
-   docente (si ya llegó), un campo de nombre final editable (solo para PPT),
-   los botones para avanzar el estado ("Marcar contactado por WhatsApp",
-   "Marcar escalado a dirección", "Marcar como listo / subir a Drive",
-   "Marcar como excepción / sin material").
-3. **Formulario de entrega** (vista del docente, accedida solo vía su link
-   único, sin login): muestra en solo lectura qué se le pide y para cuándo,
-   un campo para subir su archivo, y una confirmación de envío.
-   Si una clase tiene más de un docente asociado, cada uno tiene su propio
-   link y su propia solicitud independiente (no comparten formulario ni
-   estado).
-4. **Datos de ejemplo (seed):** la app arranca con solicitudes de muestra
-   generadas a partir de un calendario académico real de ejemplo (columnas:
-   módulo/clase, docente, fecha de la clase), simulando lo que vendría de
-   importar la planilla real de ADIPA.
+La Fase 1 no necesita accesos externos; las Fases 2 a 5 avanzan a medida que la empresa entregue cada acceso.
 
-## Datos por pantalla (qué entra, qué sale)
+| # | Fase | Qué incluye | Depende de |
+| --- | --- | --- | --- |
+| 1 | Tablero y revisión | Tablero, detalle, formulario del docente, indicador de materiales por revisar, autorizar o rechazar con motivo, filtro por diplomado, orden por fecha límite, link con el nombre del docente y de la clase, mensaje listo para enviar, etiqueta de nombre para el material de apoyo y diseño según el de ADIPA. | Nada externo |
+| 2 | Lectura de monday | Leer las clases de los próximos 15 días desde la tabla «Gestión Académica» de monday, que reúne todas las tablas madre, para que reprogramaciones y cambios de fecha se reflejen en tiempo real, y escribir en esa tabla el link de cada clase para el correo automático. | Acceso de lectura y edición a monday |
+| 3 | Drive | Al autorizar, guardar el archivo en Drive en su carpeta y marcar «Subido al Drive» en monday. | Cuenta de Operaciones con Drive |
+| 4 | Moodle | Subir el material al aula del módulo y marcar «Abierto en Aula» en monday. | Token de servicio web de Moodle |
+| 5 | PPT a monitores | Subir la presentación a la tabla «Sesión de monitores en vivo», por clase y antes de que empiece. | Acceso de edición a monday |
 
-**Tablero de seguimiento**
-- Entra: la lista completa de solicitudes en memoria (programa, módulo/clase,
-  docente, tipo de material, fecha de la clase, fecha límite calculada,
-  estado).
-- Sale: selección de una fila → navega al Detalle de solicitud.
+## Estado actual de ejecución
 
-**Detalle de solicitud**
-- Entra: los datos de la solicitud seleccionada, incluyendo el archivo
-  subido por el docente (nombre, tipo, fecha/hora de subida) si existe.
-- Sale: actualización de estado (contactado por WhatsApp / escalado a
-  dirección / listo / excepción-sin material), y para PPT el nombre final
-  editado antes de marcar como listo.
+La fase actual es la 1. Las demás esperan la aprobación del brief y los accesos de cada sistema.
 
-**Formulario de entrega (docente)**
-- Entra: identificador de la solicitud (desde el link único); en solo
-  lectura: programa, módulo/clase, tipo de material, fecha límite.
-- Sale: el archivo subido por el docente → actualiza el estado de esa
-  solicitud a "Recibido" y queda disponible en el Detalle de solicitud de
-  la coordinadora.
+| Fase | Estado | Avance | Qué falta |
+| --- | --- | --- | --- |
+| 1 · Tablero y revisión | En ejecución | Construida y probada en un entorno local con 8 clases de 2 diplomados; diseño y textos de ADIPA ya aplicados. | Link con nombre y mensaje listo, etiqueta del material de apoyo, publicarla y validarla en producción. |
+| 2 · Lectura de monday | No iniciada | Sin avance. | Acceso de lectura y edición a la tabla Gestión Académica. |
+| 3 · Drive | No iniciada | Sin avance; hoy el Drive es simulado. | Cuenta de Operaciones con Drive. |
+| 4 · Moodle | No iniciada | Sin avance. | Token de servicio web de Moodle. |
+| 5 · PPT a monitores | No iniciada | Sin avance. | Acceso de edición a monday. |
 
-## Reglas de negocio (los "si... entonces...")
+## Plazos estimados
 
-- Si el tipo de material es "material de apoyo", entonces su fecha límite
-  de solicitud es 7 días antes de la fecha de la clase.
-- Si el tipo de material es "PPT", entonces su ventana de solicitud va desde
-  2 días antes de la clase hasta 1 día después de la clase.
-- Si el docente no ha entregado y no ha pasado la fecha límite, entonces el
-  estado se muestra como "Pendiente" (aún dentro del plazo del correo
-  automático corporativo, fuera de esta app).
-- Si el docente no entrega y la coordinadora decide contactarlo, entonces
-  ella marca manualmente el estado como "Contactado por WhatsApp" (la app no
-  envía el WhatsApp).
-- Si tras el contacto por WhatsApp el docente sigue sin entregar, entonces
-  la coordinadora marca el estado como "Escalado a dirección" (la app no
-  contacta a la dirección, eso lo hace ella misma fuera de la app).
-- Si tras escalar a dirección el material sigue sin llegar, entonces la
-  coordinadora puede marcar la solicitud como "Excepción / sin material" —
-  la clase queda registrada como dictada sin ese material, en vez de
-  forzarla a un estado de "listo" que no corresponde.
-- Si una clase tiene más de un docente asociado, entonces se genera una
-  solicitud de material independiente por cada docente (mismo tipo de
-  material y mismo plazo, pero seguimiento y estado separados uno del
-  otro).
-- Si el tipo de material es "material de apoyo", entonces no se modifica —
-  se marca como listo tal como se recibió.
-- Si el tipo de material es "PPT", entonces antes de marcar como listo debe
-  tener un nombre final siguiendo la convención Clase - Nombre de la clase -
-  Programa (editable por la coordinadora, no se genera solo).
-- Si la coordinadora marca una solicitud como "Lista", entonces la app
-  simula la subida a Google Drive (cambia el estado a "Subido a Drive"); no
-  se llama a ninguna API real de Google en esta versión.
-- La subida a Moodle no ocurre dentro de la app en ningún caso — es un paso
-  manual posterior de la coordinadora, fuera de esta versión.
+Las fechas suponen que el trabajo real empieza después del 12 de noviembre, con el brief ya aprobado, y que se trabaja un viernes por semana, desde el 13 de noviembre. Cada viernes se hace un paso pequeño. Si un acceso llega tarde, la fase se corre al siguiente viernes.
 
-## Fuera de alcance (qué NO se construye en esta versión)
+| Fase | Viernes de trabajo | Acceso necesario antes del | Termina el viernes |
+| --- | --- | --- | --- |
+| 1 · Tablero y revisión | 3 | Aprobación del brief | 27 nov 2026 |
+| 2 · Lectura de monday | 2 | 4 dic 2026 (lectura y edición de Gestión Académica, y ser administrador del tablero) | 11 dic 2026 |
+| 3 · Drive | 3 | 18 dic 2026 (Drive de Operaciones y edición de Gestión Académica) | 31 dic 2026 |
+| 4 · Aula (Moodle) | 3 | 8 ene 2027 (token del servicio web) | 22 ene 2027 |
+| 5 · PPT a monitores | 2 | 29 ene 2027 (edición de la tabla de monitores) | 5 feb 2027 |
+| Cierre | 1 | Todas las fases validadas | 12 feb 2027 |
 
-- El cuestionario de evaluación post-clase (el tercer tipo de material) —
-  se descarta explícitamente para esta versión; solo se manejan material de
-  apoyo y PPT.
-- El envío del correo automático inicial al docente — sigue a cargo del
-  sistema corporativo existente de ADIPA; esta app no envía ese primer
-  correo.
-- El envío del recordatorio por WhatsApp — la coordinadora lo sigue
-  escribiendo y enviando ella misma desde su teléfono; la app solo registra
-  que ya lo hizo.
-- Integración real con Google Drive — la subida se simula (se marca el
-  estado como "Subido a Drive"); no hay credenciales ni llamadas a la API
-  real de Drive en esta versión.
-- Integración con Moodle — la carga final al aula virtual sigue siendo un
-  paso manual de la coordinadora fuera de la app.
-- Importador real de planilla (Excel/Google Sheets) — la app arranca con
-  datos de ejemplo ya cargados; no hay una pantalla para subir un archivo
-  de calendario académico y generar solicitudes automáticamente a partir de
-  él.
-- Cuentas o login para docentes — el acceso es solo vía link único no
-  adivinable por solicitud, sin contraseña ni registro.
-- Persistencia en una base de datos "de verdad" con modelado relacional,
-  migraciones, backups, etc. — se usa Redis (Upstash/Vercel KV) como una
-  única lista guardada bajo una llave, suficiente para este volumen de
-  datos. Si no hay ninguna base conectada, la app cae
+La Fase 4 es la más incierta, porque depende de quién pueda generar el token en Moodle.
+
+## Cronograma
+
+Con un viernes de trabajo por semana desde el 13 de noviembre de 2026, el proyecto cierra el 12 de febrero de 2027. En el brief vivo (Claude Docs) y en el PDF el cronograma es un diagrama de Gantt; aquí va su equivalente en texto.
+
+| Viernes | Fase en trabajo |
+| --- | --- |
+| 13, 20 y 27 nov | Fase 1 · Tablero y revisión |
+| 4 y 11 dic | Fase 2 · Lectura de monday |
+| 18 y 24 dic, 31 dic | Fase 3 · Drive |
+| 8, 15 y 22 ene | Fase 4 · Aula (Moodle) |
+| 29 ene y 5 feb | Fase 5 · PPT a monitores |
+| 12 feb | Cierre y validación |
+
+Cada fila es una semana y el trabajo se hace el viernes de esa semana, con un paso pequeño por viernes. Las fases esperan su acceso: si llega tarde, la fase pasa al siguiente viernes. Las semanas del 25 de diciembre y del 1 de enero caen en viernes feriado, así que ese trabajo se hace el jueves anterior (24 y 31 de diciembre). Si el brief se aprueba después del 12 de noviembre, todas las fechas se corren las mismas semanas.
+
+## Seguimiento del proyecto
+
+Se propone un reporte semanal corto, con la misma estructura cada vez, para que cualquiera vea el avance sin preguntar.
+
+| Qué se reporta | Detalle | Fuente |
+| --- | --- | --- |
+| Fase actual y estado | Fase en curso y estado de cada una (no iniciada, en ejecución, bloqueada, completada). | Tabla de estado de este brief |
+| Hitos de la semana | Qué se terminó y qué se hizo avanzar. | Responsable del proyecto |
+| Bloqueos y accesos | Accesos pedidos, quién debe entregarlos y desde cuándo están pendientes. | Tabla de accesos |
+| Fechas | Fecha objetivo de cada fase frente a la estimada. | Tabla de plazos |
+| Uso de la app | Solicitudes por estado (pendiente, recibido, autorizado, rechazado, excepción), y entregas fuera de plazo. | Tablero de la app |
+| Decisiones pendientes | Lo que se necesita que ADIPA resuelva. | Lista de dudas de este brief |
+
+Responsable del proyecto, frecuencia y día del reporte quedan por confirmar.
+
+## Flujo y pantallas
+
+El material pasa por una sola puerta de control: Coordinación lo revisa y, solo si corresponde, sigue a Drive, Moodle y monday. Si se rechaza, la solicitud vuelve a Pendiente y el docente ve el motivo en su mismo link para subirlo de nuevo. (El diagrama del flujo está en el brief vivo y en el PDF.)
+
+La propuesta incluye tres pantallas:
+
+- **Tablero:** todas las solicitudes con su estado; las abiertas van primero por fecha límite, hay filtros por estado, tipo y diplomado, y un aviso con los materiales por revisar.
+- **Detalle de la solicitud:** datos de la clase, archivo entregado, motivo del último rechazo y las acciones de Coordinación (contactar, escalar, autorizar, rechazar).
+- **Link del docente:** formulario sin login con lo que se pide, el plazo y, si corresponde, el motivo del rechazo anterior.
+
+## Envío del link al docente
+
+Cada solicitud (una clase y un tipo de material) tiene su propio link, sin login y imposible de adivinar. Hay dos formas de hacerlo llegar al docente: se va por la opción B, y la opción A queda como respaldo para recordatorios y reenvíos.
+
+**Opción A · Coordinación envía el link** (respaldo; no necesita accesos nuevos)
+
+1. Coordinación abre la solicitud en el tablero.
+2. La app muestra un mensaje listo para copiar, con el nombre del docente, la clase, el material pedido, el plazo y el link.
+3. Coordinación lo envía desde el correo corporativo, o por WhatsApp si el docente no responde.
+4. Coordinación marca la solicitud como contactada y la app la sigue por fecha límite.
+
+El link lleva el nombre del docente, la clase y el tipo de material, y termina en un código corto que es lo que lo hace imposible de adivinar. Por ejemplo: `/entrega/camila-fuentes-clase-1-ppt-x7k2m9`. Si ADIPA prefiere un dominio propio para estos links, lo define el equipo de TI.
+
+**Opción B · Correo automático de monday** (elegida)
+
+La tabla Gestión Académica ya envía al docente, por clase, un correo con una semana de anticipación, desde una automatización con Gmail. En esta opción la app escribe el link de cada clase en esa tabla y la automatización existente lo incluye en ese correo, así el docente lo recibe sin que nadie lo envíe a mano.
+
+- La app escribe dos links por clase, uno para el material de apoyo y otro para la presentación, en columnas nuevas del elemento de la clase. Los escribe apenas la clase entra en la ventana de 15 días, para que estén listos antes de que salga el correo.
+- La automatización se edita para insertar esas columnas en el texto del correo. monday muestra la URL completa, por eso conviene el link legible con el nombre del docente y de la clase.
+- Hace falta ser administrador del tablero para crear las columnas y editar la automatización, además del acceso de edición ya pedido.
+- Coordinación conserva el mensaje listo para recordatorios y para pedir de nuevo un material rechazado.
+
+## Diseño y formato de la app
+
+La app sigue el manual de marca de ADIPA (DESIGN.md) y el estilo comunicativo (estilo-comunicativo.md), entregados en la reunión. Ya está aplicado en el tablero, el detalle de la solicitud y la página del docente. Estos dos archivos no se guardan en este repositorio porque es público.
+
+**Diseño**
+
+- Colores: morado #704EFD como principal, celeste #2CB7FF de apoyo, fondo #F3F4FF y texto en azul marino #091E42. El color fuerte se reserva para lo que requiere acción (material por revisar) y para lo ya cerrado; el amarillo activo solo marca la escalación.
+- Tipografía: Poppins, de regular a bold; nunca extra bold.
+- Cards con borde sutil y radio de 8 px, sin patrones detrás de tablas ni formularios.
+- Logo: no se reconstruye. Falta el archivo oficial para ponerlo en el encabezado.
+
+**Textos**
+
+- Se usa el glosario de ADIPA: «docente», «aula», «presentación de la clase» en lugar de «PPT» y «material de apoyo».
+- Tono formal y cercano en la página del docente, como en los correos de aula.
+
+Por validar con el equipo de diseño: el color de error y los grises de texto no tienen equivalente en la paleta oficial (DESIGN.md, sección 15.5); la app usa los que trae el propio archivo hasta que se confirmen.
+
+## Reglas de negocio
+
+- **Material de apoyo:** el docente debe entregarlo 7 días antes de la clase.
+- **PPT:** se entrega desde 2 días antes hasta 1 día después de la clase. Se acepta después de la clase para todos los diplomados.
+- **Revisión obligatoria:** nada llega a Drive sin que Coordinación lo autorice. El indicador del tablero avisa cuántos materiales esperan revisión.
+- **Rechazo:** si el archivo no corresponde, se rechaza con un motivo escrito; la solicitud vuelve a «Pendiente» y el docente ve el motivo en su link para subirlo de nuevo.
+- **Nombre final:** al autorizar la presentación o el material de apoyo se les pone una etiqueta con el nombre de la clase: «Clase N - Nombre de la clase - Diplomado» para la presentación y «Material - Clase N - Nombre de la clase - Diplomado» para el apoyo (formato por confirmar).
+- **Destinos:** lo autorizado va a Drive (respaldo) y después a Moodle; la presentación también va, de inmediato y sin avisar al monitor, a la tabla «Sesión de monitores en vivo», hasta la hora de inicio de la clase.
+- **Marcas en monday:** «Subido al Drive» y «Abierto en Aula» se marcan por separado para el material y la presentación de cada clase; hoy se hacen a mano.
+- **Cambio de mes:** si una clase cambia de mes, se mueve de carpeta; es muy poco probable, pero ya ocurrió una vez en 5 años.
+- **Ventana de clases:** la app muestra solo las clases de los próximos 15 días de la tabla Gestión Académica; las que pasan salen solas, así que lo atrasado se verifica a mano.
+- **Orden por urgencia:** las solicitudes abiertas se ordenan por fecha límite. En la realidad pueden manejarse unos 50 diplomados activos en simultáneo cada semana, con clases en distintos módulos; sin ese filtro y ese orden el tablero se volvería inmanejable.
+
+## Estructura de carpetas en Drive y Moodle
+
+Drive es solo respaldo y sigue la misma lógica que el aula, con año y mes de inicio del diplomado arriba. Dentro de cada módulo hay dos carpetas: el material va separado por clase (puede haber muchas clases en un módulo) y las presentaciones van juntas, porque su nombre ya indica la clase.
+
+**Drive**
+
+```
+Año
+  Mes de inicio del diplomado
+    Diplomado
+      Módulo
+        Material
+          Clase 1
+          Clase 2
+        PPT
+          Clase 1 - Nombre de la clase - Diplomado.pptx
+```
+
+**Moodle** (sin año ni mes)
+
+```
+Diplomado
+  Módulo
+    Material
+      Clase 1
+      Clase 2
+    PPT
+      Clase 1 - Nombre de la clase - Diplomado.pptx
+```
+
+## Accesos que se necesitan
+
+Edwin tiene acceso de administrador en las tres plataformas; lo que falta es formalizarlo con la autorización de ADIPA y, en el caso de la app, usar una cuenta de Operaciones.
+
+| Sistema | Para qué | Acceso necesario | Fase |
+| --- | --- | --- | --- |
+| monday | Leer las clases de los próximos 15 días; marcar estados; subir la presentación a monitores | Lectura y edición de la tabla Gestión Académica; edición de la tabla de monitores. Para la opción B del envío del link: ser administrador del tablero, para crear columnas de link y editar la automatización del correo | 2 y 5 |
+| Google Drive | Guardar el respaldo ordenado | Drive de la cuenta de Operaciones | 3 |
+| Moodle | Subir el material al aula | Token de servicio web (requiere administrador del sitio) | 4 |
+
+No hace falta pedir permisos sobre cada tabla madre: la tabla Gestión Académica ya las reúne. Las claves se guardan solo como variables de entorno en Vercel; nunca en el repositorio ni en conversaciones.
+
+**Publicación de cambios:** para que Claude suba los ajustes de la Fase 1 directo a GitHub, sin que Edwin tenga que hacerlo a mano, hay que conectar GitHub a la herramienta y autorizar solo el repositorio del proyecto. Vercel publica solo después de cada cambio. Se propone que los cambios lleguen primero a una rama de revisión, con una vista previa, y que una persona de ADIPA los apruebe antes de pasar a la versión principal.
+
+## Fuera de alcance
+
+- Evaluación de fin de módulo: si el docente acepta que la saque la IA no entrega nada; si no, entrega 5 preguntas por clase. Sigue en definición.
+- Envío automático del mensaje al docente desde la app: en esta versión Coordinación lo envía con el mensaje que la app deja listo.
+- Aviso al monitor cuando se sube una presentación.
+- Mover carpetas automáticamente si una clase cambia de mes.
+- Escribir en monday valores distintos de los estados de material y presentación.
+
+## Dudas pendientes y decisiones para la reunión
+
+- [ ] ¿Quién es administrador del sitio de Moodle para generar el token del servicio web? Se necesita en la Fase 4.
+- [ ] Autorización formal de ADIPA para usar monday, Drive y Moodle desde la app con la cuenta de Operaciones.
+- [ ] Confirmar el orden de las fases 2 a 5 según qué acceso llegue primero.
+- [ ] Definir con la dirección académica la evaluación de fin de módulo (IA o 5 preguntas por clase).
+- [ ] Acordar con quién más se trabajará el proyecto y cómo se comparte el repositorio.
+- [ ] Fijar la fecha objetivo de cada fase y quién es el responsable del seguimiento semanal.
+- [x] Decidido: se va por la opción B (correo automático de monday con el link); la opción A queda como respaldo.
+- [ ] Definir si los links usan un dominio de ADIPA o se mantiene el actual.
+- [ ] Confirmar el formato de la etiqueta del material de apoyo y si puede haber más de un archivo por clase.
+- [ ] Para la opción B: el correo sale de una automatización con Gmail (confirmado); falta saber quién puede crear las columnas, editar la automatización y administrar la conexión de Gmail.
+- [ ] Autorizar la conexión con GitHub solo para el repositorio del proyecto y definir quién aprueba el paso de los cambios a la versión principal.
+- [ ] Entregar el archivo oficial del logo de ADIPA y confirmar los colores de error y de texto con el equipo de diseño.
+
+## Próximos pasos
+
+1. Aprobar el alcance y el orden de las fases.
+2. Entregar los accesos que cada fase necesita (monday, Drive y Moodle).
+3. Resolver quién genera el token de Moodle para la Fase 4.
+
+## Datos de ejemplo
+
+Mientras no llegue la Fase 2, la app arranca con solicitudes de muestra de dos
+diplomados: uno derivado de un calendario académico real de ADIPA y otro
+inventado, solo para poder probar el filtro por diplomado.
+
+
+## Nota de la Etapa 3 (encontrado al probar en Vercel)
+
+Al desplegar y probar el link de entrega desde el tablero, los links
+fallaban casi siempre ("no encontramos esta página"). La causa: Vercel
+puede atender cada solicitud desde una instancia de servidor distinta, y
+cada instancia tenía su propia copia de los datos en memoria con ids y
+links generados al azar — no coincidían entre sí. Se corrigió de dos
+formas: (1) ids y links ahora son deterministas (se calculan a partir de
+clase + docente + tipo de material, no al azar), y (2) se agregó soporte
+para guardar el estado en una base de datos Redis real (Upstash o Vercel
+KV) cuando el proyecto tiene una conectada, en vez de depender solo de la
+memoria del servidor.
+
+Con la base de datos Redis ya conectada en Vercel, apareció un segundo
+problema al probar la entrega de un archivo real: el formulario del
+docente fallaba con un error de servidor al subir archivos de más de 1 MB
+(un PPT o PDF real típicamente pesa más que eso). La causa: Next.js limita
+por defecto a 1 MB el tamaño del envío de un Server Action, un límite
+aparte del que ya validaba el propio código de la app (15 MB, ver
+"Formulario de entrega" arriba). Se corrigió configurando ese límite en
+`next.config.ts` (`experimental.serverActions.bodySizeLimit: "16mb"`), y
+se verificó subiendo un archivo real de varios MB desde el link de
+entrega en producción, con resultado correcto.
+
+## Retrospectiva
+
+**1. ¿Qué pregunta de Claude te hizo dar cuenta de algo que no tenías claro del flujo?**
+
+La pregunta sobre cómo y cuándo queda registrado el contacto por WhatsApp
+al docente. No lo tenía bien definido en el flujo: en la práctica lo hago
+de forma manual y no había pensado en que ese paso necesitaba quedar
+registrado como un estado propio dentro del proceso.
+
+**2. ¿Qué diferencia hubo entre tu mapa inicial y lo que terminaste construyendo?**
+
+Sí hay diferencia: el proceso construido queda más directo y ya no se
+pierde registro de la información — antes ese seguimiento vivía en la
+memoria y en la bandeja de correo de la coordinadora, y ahora queda
+todo trazado en un solo lugar.
+
+**3. Si tuvieras que hacer este flujo de verdad para ADIPA, ¿cuál sería el primer riesgo o pieza faltante?**
+
+Falta poder filtrar por diplomado y ordenar por la fecha límite más
+próxima, para ir registrando primero las actividades más urgentes.
+Esto es clave porque en la realidad se pueden estar manejando unos 50
+diplomados activos en simultáneo cada semana, con clases en distintos
+módulos — sin ese filtro y ese orden por urgencia, el tablero se volvería
+inmanejable a ese volumen.

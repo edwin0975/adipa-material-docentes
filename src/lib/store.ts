@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { Redis } from "@upstash/redis";
-import { CLASES_SEED, PROGRAMA } from "./seed-data";
-import type { Estado, Solicitud, TipoMaterial } from "./types";
+import { CLASES_SEED } from "./seed-data";
+import { ESTADOS_CERRADOS, type Estado, type Solicitud, type TipoMaterial } from "./types";
 
 // Almacenamiento de las solicitudes.
 //
@@ -148,13 +148,13 @@ function seedSolicitudes(): Solicitud[] {
             addDays(c.fechaClase, -3),
           );
           if (tipoMaterial === "ppt" && estadoInicial === "subido_drive") {
-            nombreFinal = `${c.clase} - ${c.nombreClase} - ${PROGRAMA}`;
+            nombreFinal = `${c.clase} - ${c.nombreClase} - ${c.programa}`;
           }
         }
 
         solicitudes.push(
           crearSolicitud({
-            programa: PROGRAMA,
+            programa: c.programa,
             modulo: c.modulo,
             clase: c.clase,
             nombreClase: c.nombreClase,
@@ -185,7 +185,17 @@ async function readAll(): Promise<Solicitud[]> {
   if (!redis) return getMemoryStore();
 
   const data = await redis.get<Solicitud[]>(REDIS_KEY);
-  if (data && data.length > 0) return data;
+  if (data && data.length > 0) {
+    // Solo para los datos de ejemplo: si agregamos solicitudes nuevas al
+    // seed (ej. un segundo diplomado), se suman a lo ya guardado sin tocar
+    // lo existente. Desaparece cuando los datos vengan de monday (Fase 2).
+    const ids = new Set(data.map((s) => s.id));
+    const faltantes = seedSolicitudes().filter((s) => !ids.has(s.id));
+    if (faltantes.length === 0) return data;
+    const unido = [...data, ...faltantes];
+    await redis.set(REDIS_KEY, unido);
+    return unido;
+  }
 
   const seeded = seedSolicitudes();
   await redis.set(REDIS_KEY, seeded);
@@ -201,9 +211,18 @@ async function writeAll(lista: Solicitud[]): Promise<void> {
   await redis.set(REDIS_KEY, lista);
 }
 
+// Orden pensado para la urgencia: primero las solicitudes que aún requieren
+// acción, con la fecha límite más próxima arriba (las ya vencidas quedan
+// primero, porque son las más urgentes); las cerradas van al final.
 export async function listSolicitudes(): Promise<Solicitud[]> {
   const all = await readAll();
-  return [...all].sort((a, b) => a.fechaLimite.localeCompare(b.fechaLimite));
+  const cerrada = (s: Solicitud) => ESTADOS_CERRADOS.includes(s.estado);
+  return [...all].sort((a, b) => {
+    const ca = cerrada(a) ? 1 : 0;
+    const cb = cerrada(b) ? 1 : 0;
+    if (ca !== cb) return ca - cb;
+    return a.fechaLimite.localeCompare(b.fechaLimite);
+  });
 }
 
 export async function getSolicitud(id: string): Promise<Solicitud | undefined> {

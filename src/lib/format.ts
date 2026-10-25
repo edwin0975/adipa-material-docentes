@@ -22,12 +22,14 @@ export function formatFechaHora(iso: string): string {
 }
 
 // Clases Tailwind por estado, para pintar la insignia (badge) en el
-// tablero y en el detalle de forma consistente.
+// tablero y en el detalle de forma consistente. Solo paleta oficial de ADIPA
+// (DESIGN.md): el color fuerte queda para lo que requiere acción (por
+// revisar) y lo ya cerrado; el amarillo activo solo marca la escalación.
 export const ESTADO_BADGE: Record<Estado, string> = {
-  pendiente: "bg-amber-100 text-amber-800 border-amber-200",
-  contactado_whatsapp: "bg-sky-100 text-sky-800 border-sky-200",
-  escalado_direccion: "bg-orange-100 text-orange-800 border-orange-200",
-  recibido: "bg-violet-100 text-violet-800 border-violet-200",
-  subido_drive: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  excepcion: "bg-rose-100 text-rose-800 border-rose-200",
+  pendiente: "bg-brand-soft text-brand-navy border-line-strong",
+  contactado_whatsapp: "bg-brand-sky text-brand-navy border-brand-secondary/40",
+  escalado_direccion: "bg-accent-yellow/30 text-brand-navy border-accent-yellow",
+  recibido: "bg-brand text-white border-brand",
+  subido_drive: "bg-brand-navy text-white border-brand-navy",
+  excepcion: "bg-white text-muted border-line-strong",
 };
