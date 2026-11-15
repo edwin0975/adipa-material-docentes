@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { agregarArchivo, finalizarEntrega, quitarArchivo } from "./actions";
+import { upload } from "@vercel/blob/client";
 import {
-  MAX_ARCHIVOS,
-  MAX_BYTES_POR_ARCHIVO,
-  MAX_MB_POR_ARCHIVO,
-  formatTamano,
-} from "@/lib/entrega";
+  agregarArchivo,
+  finalizarEntrega,
+  quitarArchivo,
+  registrarArchivoBlob,
+} from "./actions";
+import { MAX_ARCHIVOS, MAX_MB_BLOB, MAX_MB_PRUEBA, formatTamano } from "@/lib/entrega";
 
 interface Subido {
   nombre: string;
@@ -17,12 +18,18 @@ interface Subido {
 export default function EntregaForm({
   token,
   tipoMaterial,
+  usarBlob,
   subidos,
 }: {
   token: string;
   tipoMaterial: "apoyo" | "ppt";
+  usarBlob: boolean;
   subidos: Subido[];
 }) {
+  // Con almacenamiento conectado los archivos van directo a Vercel Blob y
+  // pueden ser pesados; sin él, modo de prueba con tope bajo.
+  const maxMB = usarBlob ? MAX_MB_BLOB : MAX_MB_PRUEBA;
+  const maxBytes = maxMB * 1024 * 1024;
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [progreso, setProgreso] = useState<string | null>(null);
@@ -41,10 +48,10 @@ export default function EntregaForm({
 
   function entregar() {
     setError(null);
-    const demasiado = elegidos.find((f) => f.size > MAX_BYTES_POR_ARCHIVO);
+    const demasiado = elegidos.find((f) => f.size > maxBytes);
     if (demasiado) {
       setError(
-        `«${demasiado.name}» es muy grande (máximo ${MAX_MB_POR_ARCHIVO} MB por archivo). Si pesa más, comprímelo o divídelo en partes.`,
+        `«${demasiado.name}» es muy grande (máximo ${maxMB} MB por archivo). Si pesa más, comprímelo o divídelo en partes.`,
       );
       return;
     }
@@ -62,11 +69,27 @@ export default function EntregaForm({
       for (let i = 0; i < elegidos.length; i++) {
         const f = elegidos[i];
         setProgreso(`Subiendo ${i + 1} de ${elegidos.length}: ${f.name}`);
-        const datos = new FormData();
-        datos.set("archivo", f);
         let res: { error: string | null } | undefined;
         try {
-          res = await agregarArchivo(token, datos);
+          if (usarBlob) {
+            // Directo al almacenamiento, sin pasar por la app.
+            const nombreSeguro = f.name.replace(/[\\/]/g, "_");
+            const blob = await upload(`entrega/${token}/${nombreSeguro}`, f, {
+              access: "private",
+              handleUploadUrl: "/api/entrega/subida",
+              clientPayload: token,
+              multipart: f.size > 20 * 1024 * 1024,
+            });
+            res = await registrarArchivoBlob(token, {
+              nombreOriginal: f.name,
+              tipoMime: f.type,
+              pathname: blob.pathname,
+            });
+          } else {
+            const datos = new FormData();
+            datos.set("archivo", f);
+            res = await agregarArchivo(token, datos);
+          }
         } catch {
           res = {
             error: `No se pudo subir «${f.name}». Revisa tu conexión y vuelve a intentarlo.`,
@@ -140,7 +163,7 @@ export default function EntregaForm({
           {etiqueta}
         </label>
         <p className="mt-0.5 text-xs text-subtle">
-          Máximo {MAX_MB_POR_ARCHIVO} MB por archivo. Para elegir varios, mantén
+          Máximo {maxMB} MB por archivo. Para elegir varios, mantén
           pulsada la tecla Ctrl (o Cmd) al hacer clic.
         </p>
         <input

@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { getSolicitudByToken, updateSolicitud } from "@/lib/store";
 import { ESTADOS_ENTREGABLES } from "@/lib/types";
+import { head } from "@vercel/blob";
+import { blobDisponible, borrarDeBlob } from "@/lib/blob";
 import { MAX_ARCHIVOS, MAX_BYTES_POR_ARCHIVO, MAX_MB_POR_ARCHIVO } from "@/lib/entrega";
 
 // La entrega tiene tres pasos, para que cada archivo viaje en su propia
@@ -44,6 +46,7 @@ export async function agregarArchivo(token: string, formData: FormData) {
   // Si el docente vuelve a subir un archivo con el mismo nombre (por ejemplo
   // al reintentar), reemplaza al anterior en vez de duplicarse.
   const sinRepetido = previos.filter((a) => a.nombreOriginal !== file.name);
+  await borrarDeBlob(previos.filter((a) => a.nombreOriginal === file.name));
   if (sinRepetido.length >= MAX_ARCHIVOS) {
     return { error: `Se pueden entregar hasta ${MAX_ARCHIVOS} archivos por solicitud.` };
   }
@@ -65,14 +68,65 @@ export async function agregarArchivo(token: string, formData: FormData) {
   return { error: null };
 }
 
+// Con Vercel Blob el archivo ya subió directo desde el navegador del docente;
+// aquí solo se anota en la solicitud. Se confirma con el almacenamiento que el
+// archivo exista y que la ruta pertenezca a este link.
+export async function registrarArchivoBlob(
+  token: string,
+  datos: { nombreOriginal: string; tipoMime: string; pathname: string },
+) {
+  const solicitud = await getSolicitudByToken(token);
+  if (!solicitud) return { error: "No se encontró la solicitud." };
+  if (!ESTADOS_ENTREGABLES.includes(solicitud.estado)) {
+    return { error: "Esta solicitud ya no admite nuevas entregas." };
+  }
+  if (!blobDisponible()) return { error: "Almacenamiento no disponible." };
+  if (!datos.pathname.startsWith(`entrega/${token}/`) || !datos.nombreOriginal) {
+    return { error: "Ruta de archivo no válida." };
+  }
+
+  let bytes: number;
+  try {
+    bytes = (await head(datos.pathname)).size;
+  } catch {
+    return { error: `No se encontró «${datos.nombreOriginal}» en el almacenamiento. Vuelve a intentarlo.` };
+  }
+
+  const previos = solicitud.archivos ?? [];
+  const repetidos = previos.filter((a) => a.nombreOriginal === datos.nombreOriginal);
+  const sinRepetido = previos.filter((a) => a.nombreOriginal !== datos.nombreOriginal);
+  if (sinRepetido.length >= MAX_ARCHIVOS) {
+    await borrarDeBlob([{ ...datos, fechaSubida: "", blobPathname: datos.pathname }]);
+    return { error: `Se pueden entregar hasta ${MAX_ARCHIVOS} archivos por solicitud.` };
+  }
+  await borrarDeBlob(repetidos.filter((a) => a.blobPathname !== datos.pathname));
+
+  await updateSolicitud(solicitud.id, {
+    archivos: [
+      ...sinRepetido,
+      {
+        nombreOriginal: datos.nombreOriginal,
+        tipoMime: datos.tipoMime || "application/octet-stream",
+        fechaSubida: new Date().toISOString(),
+        blobPathname: datos.pathname,
+        bytes,
+      },
+    ],
+  });
+  revalidar(solicitud.id, token);
+  return { error: null };
+}
+
 export async function quitarArchivo(token: string, nombreOriginal: string) {
   const solicitud = await getSolicitudByToken(token);
   if (!solicitud) return { error: "No se encontró la solicitud." };
   if (!ESTADOS_ENTREGABLES.includes(solicitud.estado)) {
     return { error: "Esta solicitud ya no admite cambios." };
   }
+  const previos = solicitud.archivos ?? [];
+  await borrarDeBlob(previos.filter((a) => a.nombreOriginal === nombreOriginal));
   await updateSolicitud(solicitud.id, {
-    archivos: (solicitud.archivos ?? []).filter((a) => a.nombreOriginal !== nombreOriginal),
+    archivos: previos.filter((a) => a.nombreOriginal !== nombreOriginal),
   });
   revalidar(solicitud.id, token);
   return { error: null };

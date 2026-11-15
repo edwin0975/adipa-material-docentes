@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getSolicitudByToken } from "@/lib/store";
-import { ESTADOS_ENTREGABLES, TIPO_LABEL } from "@/lib/types";
+import { ESTADOS_ENTREGABLES, TIPO_LABEL, tamanoArchivo } from "@/lib/types";
+import { blobDisponible } from "@/lib/blob";
 import { formatFecha } from "@/lib/format";
 import EntregaForm from "./EntregaForm";
 
@@ -78,9 +79,10 @@ export default async function EntregaPage({
             <EntregaForm
               token={token}
               tipoMaterial={solicitud.tipoMaterial}
+              usarBlob={blobDisponible()}
               subidos={(solicitud.archivos ?? []).map((a) => ({
                 nombre: a.nombreOriginal,
-                bytes: Math.floor((a.contenidoBase64.length * 3) / 4),
+                bytes: tamanoArchivo(a),
               }))}
             />
           ) : solicitud.estado === "recibido" ? (

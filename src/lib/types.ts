@@ -12,7 +12,18 @@ export interface Archivo {
   nombreOriginal: string;
   tipoMime: string;
   fechaSubida: string; // ISO datetime
-  contenidoBase64: string;
+  // El archivo vive en uno de dos lugares:
+  //  - Vercel Blob (cuando el proyecto tiene un almacenamiento conectado):
+  //    aquí solo se guarda su ruta y su tamaño.
+  //  - Dentro de la base de datos, en base64 (modo de prueba, solo livianos).
+  blobPathname?: string;
+  bytes?: number;
+  contenidoBase64?: string;
+}
+
+// Tamaño en bytes de un archivo, esté donde esté guardado.
+export function tamanoArchivo(a: Archivo): number {
+  return a.bytes ?? Math.floor(((a.contenidoBase64?.length ?? 0) * 3) / 4);
 }
 
 export interface Solicitud {

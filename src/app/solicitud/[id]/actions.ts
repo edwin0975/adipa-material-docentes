@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getSolicitud, updateSolicitud } from "@/lib/store";
 import { AL_MATERIAL } from "@/lib/etiqueta";
+import { borrarDeBlob } from "@/lib/blob";
 
 function revalidar(id: string, linkToken?: string) {
   revalidatePath("/");
@@ -66,6 +67,7 @@ export async function rechazarMaterial(id: string, motivo: string) {
     return { error: "Escribe el motivo del rechazo para que el docente sepa qué corregir." };
   }
 
+  await borrarDeBlob(solicitud.archivos);
   await updateSolicitud(id, {
     estado: "pendiente",
     archivos: undefined,

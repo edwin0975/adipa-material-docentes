@@ -232,7 +232,9 @@ No hace falta pedir permisos sobre cada tabla madre: la tabla Gestión Académic
 - [ ] Definir si los links usan un dominio de ADIPA o se mantiene el actual.
 - [x] Decidido: el material de apoyo siempre trae varios archivos y la presentación suele ser uno, pero a veces más. La app acepta varios archivos en ambos casos y, al autorizar, los numera: «… (1)», «… (2)».
 - [ ] Confirmar el formato de la etiqueta del material de apoyo («Material - Clase N - Nombre de la clase - Diplomado»).
-- [ ] Resolver el peso de los archivos: hoy cada archivo, incluido un .zip, puede pesar hasta 4 MB por un límite de Vercel. Para archivos más pesados hay que subirlos directo a un almacenamiento (Vercel Blob) o a Google Drive en la Fase 3; falta decidir cuál y el peso máximo que necesitan los docentes.
+- [x] Decidido (provisorio): mientras llega el acceso a Google Drive, los archivos se guardan en Vercel Blob (plan gratuito: 1 GB, unas 2.000 subidas al mes), en un almacenamiento privado. El docente sube directo al almacenamiento, hasta 100 MB por archivo. Sin almacenamiento conectado la app sigue en modo de prueba (4 MB por archivo, dentro de la base de datos).
+- [ ] Confirmar con quien administra la cuenta de Vercel que el plan permite este uso, y vigilar el límite de 1 GB. Si se supera, el almacenamiento se bloquea por 30 días; con el plan Pro se paga por uso.
+- [ ] Antes de enviar links reales: crear el almacenamiento en Vercel (Storage → Create → Blob, acceso Privado, con la variable de lectura y escritura) y crear LINK_SECRET.
 - [ ] Para la opción B: el correo sale de una automatización con Gmail (confirmado); falta saber quién puede crear las columnas, editar la automatización y administrar la conexión de Gmail.
 - [ ] Autorizar la conexión con GitHub solo para el repositorio del proyecto y definir quién aprueba el paso de los cambios a la versión principal.
 - [ ] Entregar el archivo oficial del logo de ADIPA y confirmar los colores de error y de texto con el equipo de diseño.
