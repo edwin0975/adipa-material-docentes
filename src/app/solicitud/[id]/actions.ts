@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getSolicitud, updateSolicitud } from "@/lib/store";
+import { AL_MATERIAL } from "@/lib/etiqueta";
 
 function revalidar(id: string, linkToken?: string) {
   revalidatePath("/");
@@ -33,10 +34,9 @@ export async function autorizarYSubirDrive(id: string, nombreFinal?: string) {
     return { error: "Solo se puede autorizar un material que ya fue recibido." };
   }
 
-  if (solicitud.tipoMaterial === "ppt" && !nombreFinal?.trim()) {
+  if (!nombreFinal?.trim()) {
     return {
-      error:
-        "Antes de autorizar, ponle el nombre final a la presentación de la clase (convención: Clase - Nombre de la clase - Programa).",
+      error: `Antes de autorizar, ponle el nombre final ${AL_MATERIAL[solicitud.tipoMaterial]} (usa el nombre sugerido o escribe el tuyo).`,
     };
   }
 
@@ -44,7 +44,7 @@ export async function autorizarYSubirDrive(id: string, nombreFinal?: string) {
   // (ver BRIEF.md, "Fases de construcción").
   await updateSolicitud(id, {
     estado: "subido_drive",
-    nombreFinal: solicitud.tipoMaterial === "ppt" ? nombreFinal?.trim() : solicitud.nombreFinal,
+    nombreFinal: nombreFinal.trim(),
   });
   revalidar(id, solicitud.linkToken);
   return { error: null };

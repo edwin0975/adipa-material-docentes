@@ -28,7 +28,7 @@ export interface Solicitud {
   ventanaInicio?: string; // ISO date, solo para "ppt"
   fechaLimite: string; // ISO date
   estado: Estado;
-  nombreFinal?: string; // solo relevante/editable para "ppt"
+  nombreFinal?: string; // etiqueta que recibe el material al autorizarlo (apoyo y ppt)
   archivo?: Archivo;
   // Si la coordinadora rechazó el último archivo entregado: por qué, y
   // cuándo. La solicitud vuelve a "pendiente" y el docente ve el motivo en

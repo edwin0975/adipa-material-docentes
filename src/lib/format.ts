@@ -33,3 +33,17 @@ export const ESTADO_BADGE: Record<Estado, string> = {
   subido_drive: "bg-brand-navy text-white border-brand-navy",
   excepcion: "bg-white text-muted border-line-strong",
 };
+
+// Fecha larga para textos corridos, ej. «viernes 5 de junio de 2026».
+export function formatFechaLarga(iso: string): string {
+  const d = new Date(iso + "T00:00:00Z");
+  return d
+    .toLocaleDateString("es-CL", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+    .replace(",", "");
+}
