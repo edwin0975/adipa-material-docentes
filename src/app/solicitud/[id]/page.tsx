@@ -4,6 +4,7 @@ import { getSolicitud } from "@/lib/store";
 import { ESTADO_LABEL, TIPO_LABEL } from "@/lib/types";
 import { ESTADO_BADGE, formatFecha, formatFechaHora } from "@/lib/format";
 import AccionesSolicitud from "./AccionesSolicitud";
+import EnlaceYMensaje from "./EnlaceYMensaje";
 
 export default async function DetalleSolicitudPage({
   params,
@@ -13,8 +14,6 @@ export default async function DetalleSolicitudPage({
   const { id } = await params;
   const solicitud = await getSolicitud(id);
   if (!solicitud) notFound();
-
-  const linkDocente = `/entrega/${solicitud.linkToken}`;
 
   return (
     <div className="space-y-6">
@@ -97,6 +96,12 @@ export default async function DetalleSolicitudPage({
             Aún no hay ningún archivo entregado por el docente.
           </p>
         )}
+        {solicitud.nombreFinal && (
+          <p className="mt-3 text-sm text-muted">
+            <span className="text-subtle">Nombre final: </span>
+            <span className="font-medium text-brand-navy">{solicitud.nombreFinal}</span>
+          </p>
+        )}
         {solicitud.motivoRechazo && !solicitud.archivo && (
           <p className="mt-3 rounded-adipa-control bg-danger/10 px-3 py-2 text-sm text-ink">
             <span className="font-medium">Último archivo rechazado</span>
@@ -117,20 +122,11 @@ export default async function DetalleSolicitudPage({
 
       <div className="rounded-adipa-card border border-dashed border-line-strong bg-white p-6">
         <h2 className="text-sm font-semibold text-brand-navy">
-          Link de entrega del docente
+          Enviar el link al docente
         </h2>
-        <p className="mt-1 text-sm text-muted">
-          Este es el link que recibe el docente para entregar su material.
-          Puedes abrirlo para ver lo que ve el docente.
-        </p>
-        <p className="mt-3">
-          <Link
-            href={linkDocente}
-            className="break-all text-sm font-medium text-brand-navy underline"
-          >
-            {linkDocente}
-          </Link>
-        </p>
+        <div className="mt-3">
+          <EnlaceYMensaje solicitud={solicitud} />
+        </div>
       </div>
     </div>
   );

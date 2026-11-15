@@ -1,6 +1,7 @@
-import { createHash } from "crypto";
+import { createHash, createHmac } from "crypto";
 import { Redis } from "@upstash/redis";
 import { CLASES_SEED } from "./seed-data";
+import { nombreSugerido } from "./etiqueta";
 import { ESTADOS_CERRADOS, type Estado, type Solicitud, type TipoMaterial } from "./types";
 
 // Almacenamiento de las solicitudes.
@@ -59,9 +60,28 @@ function idDeterminista(modulo: string, clase: string, docente: string, tipo: Ti
   return slug(`${modulo}-${clase}-${docente}-${tipo}`);
 }
 
-function tokenDeterminista(id: string): string {
-  // No es criptográficamente secreto (esto es una prueba técnica), pero
-  // no es adivinable a simple vista y es estable entre reinicios.
+// Link legible: «docente-clase-tipo-código». El nombre ayuda a reconocerlo
+// de un vistazo; el código corto al final es lo que lo hace imposible de
+// adivinar. Se calcula a partir de la solicitud (no se guarda), así sigue
+// igual aunque el servidor se reinicie.
+//
+// Para que el código no se pueda calcular desde el repositorio público,
+// en Vercel se define la variable de entorno LINK_SECRET (cualquier texto
+// largo). Sin ella (desarrollo local) se usa un valor por defecto.
+function codigoCorto(id: string): string {
+  const secreto = process.env.LINK_SECRET ?? "adipa-material-docentes-local";
+  const huella = createHmac("sha256", secreto).update(`entrega:${id}`).digest();
+  return huella.readBigUInt64BE(0).toString(36).padStart(8, "0").slice(-8);
+}
+
+function tokenLegible(s: Pick<Solicitud, "id" | "docente" | "clase" | "tipoMaterial">): string {
+  const tipo = s.tipoMaterial === "ppt" ? "presentacion" : "apoyo";
+  return `${slug(s.docente)}-${slug(s.clase)}-${tipo}-${codigoCorto(s.id)}`;
+}
+
+// Token que se usaba antes de los links legibles. Se sigue aceptando para
+// que los links que ya se hayan enviado no dejen de funcionar.
+function tokenAnterior(id: string): string {
   return createHash("sha256").update(`entrega:${id}`).digest("hex").slice(0, 32);
 }
 
@@ -85,7 +105,7 @@ function crearSolicitud(params: {
 
   return {
     id,
-    linkToken: tokenDeterminista(id),
+    linkToken: tokenLegible({ id, docente: params.docente, clase: params.clase, tipoMaterial }),
     programa: params.programa,
     modulo: params.modulo,
     clase: params.clase,
@@ -147,8 +167,13 @@ function seedSolicitudes(): Solicitud[] {
               : "application/pdf",
             addDays(c.fechaClase, -3),
           );
-          if (tipoMaterial === "ppt" && estadoInicial === "subido_drive") {
-            nombreFinal = `${c.clase} - ${c.nombreClase} - ${c.programa}`;
+          if (estadoInicial === "subido_drive") {
+            nombreFinal = nombreSugerido({
+              tipoMaterial,
+              clase: c.clase,
+              nombreClase: c.nombreClase,
+              programa: c.programa,
+            });
           }
         }
 
@@ -184,7 +209,10 @@ async function readAll(): Promise<Solicitud[]> {
   const redis = getRedis();
   if (!redis) return getMemoryStore();
 
-  const data = await redis.get<Solicitud[]>(REDIS_KEY);
+  const guardadas = await redis.get<Solicitud[]>(REDIS_KEY);
+  // Las solicitudes guardadas antes de los links legibles traen el token
+  // anterior: se recalcula siempre, porque se deriva de la propia solicitud.
+  const data = guardadas?.map((s) => ({ ...s, linkToken: tokenLegible(s) }));
   if (data && data.length > 0) {
     // Solo para los datos de ejemplo: si agregamos solicitudes nuevas al
     // seed (ej. un segundo diplomado), se suman a lo ya guardado sin tocar
@@ -232,7 +260,7 @@ export async function getSolicitud(id: string): Promise<Solicitud | undefined> {
 
 export async function getSolicitudByToken(token: string): Promise<Solicitud | undefined> {
   const all = await readAll();
-  return all.find((s) => s.linkToken === token);
+  return all.find((s) => s.linkToken === token || tokenAnterior(s.id) === token);
 }
 
 export async function updateSolicitud(

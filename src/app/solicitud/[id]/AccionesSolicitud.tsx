@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Solicitud } from "@/lib/types";
+import { nombreSugerido, DEL_MATERIAL } from "@/lib/etiqueta";
 import {
   marcarContactadoWhatsapp,
   marcarEscaladoDireccion,
@@ -47,6 +48,7 @@ export default function AccionesSolicitud({ solicitud }: { solicitud: Solicitud 
   const [motivo, setMotivo] = useState("");
 
   const { estado, tipoMaterial, id } = solicitud;
+  const sugerido = nombreSugerido(solicitud);
 
   function ejecutar(fn: () => Promise<void>) {
     setError(null);
@@ -110,23 +112,30 @@ export default function AccionesSolicitud({ solicitud }: { solicitud: Solicitud 
 
       {estado === "recibido" && (
         <div className="space-y-4">
-          {tipoMaterial === "ppt" && (
-            <div>
-              <label className="block text-sm font-medium text-ink">
-                Nombre final de la presentación{" "}
-                <span className="font-normal text-subtle">
-                  (convención: Clase - Nombre de la clase - Programa)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={nombreFinal}
-                onChange={(e) => setNombreFinal(e.target.value)}
-                placeholder={`${solicitud.clase} - ${solicitud.nombreClase} - ${solicitud.programa}`}
-                className="mt-1 w-full rounded-adipa-control border border-line-strong px-3 py-2 text-sm"
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-ink">
+              Nombre final {DEL_MATERIAL[tipoMaterial]}
+            </label>
+            <p className="mt-0.5 text-xs text-subtle">
+              Formato: {sugerido}
+            </p>
+            <input
+              type="text"
+              value={nombreFinal}
+              onChange={(e) => setNombreFinal(e.target.value)}
+              placeholder={sugerido}
+              className="mt-1 w-full rounded-adipa-control border border-line-strong px-3 py-2 text-sm"
+            />
+            {nombreFinal.trim() !== sugerido && (
+              <button
+                type="button"
+                onClick={() => setNombreFinal(sugerido)}
+                className="mt-1 text-sm font-medium text-brand underline"
+              >
+                Usar el nombre sugerido
+              </button>
+            )}
+          </div>
 
           {!rechazando && (
             <div className="flex flex-wrap gap-2">
