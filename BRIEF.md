@@ -230,7 +230,9 @@ No hace falta pedir permisos sobre cada tabla madre: la tabla Gestión Académic
 - [ ] Fijar la fecha objetivo de cada fase y quién es el responsable del seguimiento semanal.
 - [x] Decidido: se va por la opción B (correo automático de monday con el link); la opción A queda como respaldo.
 - [ ] Definir si los links usan un dominio de ADIPA o se mantiene el actual.
-- [ ] Confirmar el formato de la etiqueta del material de apoyo y si puede haber más de un archivo por clase.
+- [x] Decidido: el material de apoyo siempre trae varios archivos y la presentación suele ser uno, pero a veces más. La app acepta varios archivos en ambos casos y, al autorizar, los numera: «… (1)», «… (2)».
+- [ ] Confirmar el formato de la etiqueta del material de apoyo («Material - Clase N - Nombre de la clase - Diplomado»).
+- [ ] Resolver el peso de los archivos: hoy cada archivo, incluido un .zip, puede pesar hasta 4 MB por un límite de Vercel. Para archivos más pesados hay que subirlos directo a un almacenamiento (Vercel Blob) o a Google Drive en la Fase 3; falta decidir cuál y el peso máximo que necesitan los docentes.
 - [ ] Para la opción B: el correo sale de una automatización con Gmail (confirmado); falta saber quién puede crear las columnas, editar la automatización y administrar la conexión de Gmail.
 - [ ] Autorizar la conexión con GitHub solo para el repositorio del proyecto y definir quién aprueba el paso de los cambios a la versión principal.
 - [ ] Entregar el archivo oficial del logo de ADIPA y confirmar los colores de error y de texto con el equipo de diseño.

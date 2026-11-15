@@ -1,4 +1,4 @@
-import type { Solicitud } from "./types";
+import type { Archivo, Solicitud } from "./types";
 
 // Nombre final que recibe el material al autorizarlo (BRIEF.md, regla
 // «Nombre final»). Formato por confirmar con ADIPA:
@@ -27,3 +27,22 @@ export const AL_MATERIAL = {
   apoyo: "al material de apoyo",
   ppt: "a la presentación de la clase",
 } as const;
+
+function extension(nombre: string): string {
+  const i = nombre.lastIndexOf(".");
+  return i > 0 && nombre.length - i <= 8 ? nombre.slice(i) : "";
+}
+
+// Nombres con que queda cada archivo al autorizar: el nombre final base,
+// con número cuando hay más de un archivo — «… (1).pdf», «… (2).pdf» — y la
+// extensión de cada archivo original.
+export function nombresFinales(
+  base: string,
+  archivos: Pick<Archivo, "nombreOriginal">[],
+): string[] {
+  const limpio = base.trim();
+  return archivos.map((a, i) => {
+    const num = archivos.length > 1 ? ` (${i + 1})` : "";
+    return `${limpio}${num}${extension(a.nombreOriginal)}`;
+  });
+}

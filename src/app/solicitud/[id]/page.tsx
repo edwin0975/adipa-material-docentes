@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSolicitud } from "@/lib/store";
-import { ESTADO_LABEL, TIPO_LABEL } from "@/lib/types";
+import { ESTADOS_ENTREGABLES, ESTADO_LABEL, TIPO_LABEL } from "@/lib/types";
+import { nombresFinales } from "@/lib/etiqueta";
 import { ESTADO_BADGE, formatFecha, formatFechaHora } from "@/lib/format";
 import AccionesSolicitud from "./AccionesSolicitud";
 import EnlaceYMensaje from "./EnlaceYMensaje";
@@ -14,6 +15,9 @@ export default async function DetalleSolicitudPage({
   const { id } = await params;
   const solicitud = await getSolicitud(id);
   if (!solicitud) notFound();
+
+  const archivos = solicitud.archivos ?? [];
+  const entregaEnCurso = ESTADOS_ENTREGABLES.includes(solicitud.estado) && archivos.length > 0;
 
   return (
     <div className="space-y-6">
@@ -74,35 +78,57 @@ export default async function DetalleSolicitudPage({
         <h2 className="text-sm font-semibold text-brand-navy">
           Material entregado
         </h2>
-        {solicitud.archivo ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-adipa-control bg-brand-soft px-4 py-3 text-sm">
-            <div>
-              <p className="font-medium text-brand-navy">
-                {solicitud.archivo.nombreOriginal}
+        {archivos.length > 0 ? (
+          <>
+            {entregaEnCurso && (
+              <p className="mt-2 text-sm text-muted">
+                El docente ya subió archivos, pero todavía no termina su
+                entrega.
               </p>
-              <p className="text-subtle">
-                Entregado el {formatFechaHora(solicitud.archivo.fechaSubida)}
-              </p>
-            </div>
-            <a
-              href={`/api/archivo/${solicitud.id}`}
-              className="rounded-adipa-control border border-line-strong px-3 py-1.5 font-medium text-ink hover:bg-white"
-            >
-              Descargar
-            </a>
-          </div>
+            )}
+            <ul className="mt-3 space-y-2">
+              {archivos.map((a, i) => (
+                <li
+                  key={a.nombreOriginal}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-adipa-control bg-brand-soft px-4 py-3 text-sm"
+                >
+                  <div>
+                    <p className="font-medium text-brand-navy">{a.nombreOriginal}</p>
+                    <p className="text-subtle">
+                      Entregado el {formatFechaHora(a.fechaSubida)}
+                    </p>
+                  </div>
+                  <a
+                    href={`/api/archivo/${solicitud.id}?n=${i}`}
+                    className="rounded-adipa-control border border-line-strong px-3 py-1.5 font-medium text-ink hover:bg-white"
+                  >
+                    Descargar
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
         ) : (
           <p className="mt-2 text-sm text-subtle">
             Aún no hay ningún archivo entregado por el docente.
           </p>
         )}
         {solicitud.nombreFinal && (
-          <p className="mt-3 text-sm text-muted">
-            <span className="text-subtle">Nombre final: </span>
-            <span className="font-medium text-brand-navy">{solicitud.nombreFinal}</span>
-          </p>
+          <div className="mt-3 text-sm text-muted">
+            <p>
+              <span className="text-subtle">Nombre final: </span>
+              <span className="font-medium text-brand-navy">{solicitud.nombreFinal}</span>
+            </p>
+            {archivos.length > 0 && (
+              <ul className="mt-1 list-inside list-disc text-subtle">
+                {nombresFinales(solicitud.nombreFinal, archivos).map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
-        {solicitud.motivoRechazo && !solicitud.archivo && (
+        {solicitud.motivoRechazo && archivos.length === 0 && (
           <p className="mt-3 rounded-adipa-control bg-danger/10 px-3 py-2 text-sm text-ink">
             <span className="font-medium">Último archivo rechazado</span>
             {solicitud.fechaRechazo

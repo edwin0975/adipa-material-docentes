@@ -21,7 +21,7 @@ export function mensajeParaDocente(s: Solicitud, urlBase: string): string {
     "",
     plazo,
     "",
-    "Puedes subir el archivo, sin iniciar sesión, desde este link:",
+    "Puedes subir los archivos, sin iniciar sesión, desde este link:",
     link,
     "",
     "Muchas gracias por tu apoyo.",

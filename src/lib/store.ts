@@ -85,6 +85,13 @@ function tokenAnterior(id: string): string {
   return createHash("sha256").update(`entrega:${id}`).digest("hex").slice(0, 32);
 }
 
+// Datos guardados antes de aceptar varios archivos traen un solo `archivo`.
+function normalizar(s: Solicitud): Solicitud {
+  const { archivo, ...resto } = s;
+  const archivos = s.archivos ?? (archivo ? [archivo] : undefined);
+  return { ...resto, archivos };
+}
+
 function crearSolicitud(params: {
   programa: string;
   modulo: string;
@@ -94,7 +101,7 @@ function crearSolicitud(params: {
   tipoMaterial: TipoMaterial;
   fechaClase: string;
   estadoInicial: Estado;
-  archivo?: Solicitud["archivo"];
+  archivos?: Solicitud["archivos"];
   nombreFinal?: string;
 }): Solicitud {
   const { tipoMaterial, fechaClase } = params;
@@ -117,7 +124,7 @@ function crearSolicitud(params: {
     fechaLimite,
     estado: params.estadoInicial,
     nombreFinal: params.nombreFinal,
-    archivo: params.archivo,
+    archivos: params.archivos,
   };
 }
 
@@ -151,22 +158,25 @@ function seedSolicitudes(): Solicitud[] {
         const estadoInicial = GUION_ESTADOS[i] ?? "pendiente";
         i += 1;
 
-        let archivo: Solicitud["archivo"] | undefined;
+        let archivos: Solicitud["archivos"] | undefined;
         let nombreFinal: string | undefined;
 
         if (estadoInicial === "recibido" || estadoInicial === "subido_drive") {
-          const ext = tipoMaterial === "ppt" ? "pptx" : "pdf";
-          const nombreOriginal =
+          const fecha = addDays(c.fechaClase, -3);
+          const pdf = "application/pdf";
+          // El material de apoyo trae varios archivos; la presentación, uno.
+          archivos =
             tipoMaterial === "ppt"
-              ? `presentacion_${slug(docente)}.${ext}`
-              : `material_apoyo_${slug(c.clase)}.${ext}`;
-          archivo = fakeArchivo(
-            nombreOriginal,
-            tipoMaterial === "ppt"
-              ? "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-              : "application/pdf",
-            addDays(c.fechaClase, -3),
-          );
+              ? [
+                  fakeArchivo(
+                    `presentacion_${slug(docente)}.pptx`,
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    fecha,
+                  ),
+                ]
+              : ["guia", "lecturas", "casos"].map((parte) =>
+                  fakeArchivo(`material_apoyo_${slug(c.clase)}_${parte}.pdf`, pdf, fecha),
+                );
           if (estadoInicial === "subido_drive") {
             nombreFinal = nombreSugerido({
               tipoMaterial,
@@ -187,7 +197,7 @@ function seedSolicitudes(): Solicitud[] {
             tipoMaterial,
             fechaClase: c.fechaClase,
             estadoInicial,
-            archivo,
+            archivos,
             nombreFinal,
           }),
         );
@@ -212,7 +222,7 @@ async function readAll(): Promise<Solicitud[]> {
   const guardadas = await redis.get<Solicitud[]>(REDIS_KEY);
   // Las solicitudes guardadas antes de los links legibles traen el token
   // anterior: se recalcula siempre, porque se deriva de la propia solicitud.
-  const data = guardadas?.map((s) => ({ ...s, linkToken: tokenLegible(s) }));
+  const data = guardadas?.map((s) => normalizar({ ...s, linkToken: tokenLegible(s) }));
   if (data && data.length > 0) {
     // Solo para los datos de ejemplo: si agregamos solicitudes nuevas al
     // seed (ej. un segundo diplomado), se suman a lo ya guardado sin tocar

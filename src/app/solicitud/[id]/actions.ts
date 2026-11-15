@@ -68,7 +68,7 @@ export async function rechazarMaterial(id: string, motivo: string) {
 
   await updateSolicitud(id, {
     estado: "pendiente",
-    archivo: undefined,
+    archivos: undefined,
     nombreFinal: undefined,
     motivoRechazo: motivoLimpio,
     fechaRechazo: new Date().toISOString(),

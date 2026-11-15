@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Solicitud } from "@/lib/types";
-import { nombreSugerido, DEL_MATERIAL } from "@/lib/etiqueta";
+import { nombreSugerido, nombresFinales, DEL_MATERIAL } from "@/lib/etiqueta";
 import {
   marcarContactadoWhatsapp,
   marcarEscaladoDireccion,
@@ -126,6 +126,16 @@ export default function AccionesSolicitud({ solicitud }: { solicitud: Solicitud 
               placeholder={sugerido}
               className="mt-1 w-full rounded-adipa-control border border-line-strong px-3 py-2 text-sm"
             />
+            {(solicitud.archivos?.length ?? 0) > 1 && (
+              <p className="mt-1 text-xs text-subtle">
+                Los {solicitud.archivos?.length} archivos quedarán con este
+                nombre y un número al final:{" "}
+                {nombresFinales(nombreFinal.trim() || sugerido, solicitud.archivos ?? [])
+                  .slice(0, 2)
+                  .join(", ")}
+                …
+              </p>
+            )}
             {nombreFinal.trim() !== sugerido && (
               <button
                 type="button"

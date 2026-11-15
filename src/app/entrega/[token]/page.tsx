@@ -71,11 +71,18 @@ export default async function EntregaPage({
 
       <div className="adipa-card p-6">
         <h2 className="text-sm font-semibold text-brand-navy">
-          Sube tu archivo
+          {solicitud.tipoMaterial === "apoyo" ? "Sube tus archivos" : "Sube tu presentación"}
         </h2>
         <div className="mt-3">
           {puedeEntregar ? (
-            <EntregaForm token={token} />
+            <EntregaForm
+              token={token}
+              tipoMaterial={solicitud.tipoMaterial}
+              subidos={(solicitud.archivos ?? []).map((a) => ({
+                nombre: a.nombreOriginal,
+                bytes: Math.floor((a.contenidoBase64.length * 3) / 4),
+              }))}
+            />
           ) : solicitud.estado === "recibido" ? (
             <p className="rounded-adipa-control bg-brand-sky/50 px-4 py-3 text-sm text-brand-navy">
               Recibimos tu material y está en revisión. ¡Gracias!

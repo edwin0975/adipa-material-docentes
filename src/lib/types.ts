@@ -28,7 +28,13 @@ export interface Solicitud {
   ventanaInicio?: string; // ISO date, solo para "ppt"
   fechaLimite: string; // ISO date
   estado: Estado;
-  nombreFinal?: string; // etiqueta que recibe el material al autorizarlo (apoyo y ppt)
+  nombreFinal?: string; // etiqueta base del material al autorizarlo (apoyo y ppt)
+  // Archivos entregados por el docente. El material de apoyo siempre trae
+  // varios y la presentación a veces también. Mientras la solicitud sigue
+  // entregable pueden ser una entrega a medias (el docente aún no la termina).
+  archivos?: Archivo[];
+  // Campo de cuando se entregaba un solo archivo. Los datos guardados antes
+  // del cambio lo traen; al leerlos se pasa a `archivos` (ver store.ts).
   archivo?: Archivo;
   // Si la coordinadora rechazó el último archivo entregado: por qué, y
   // cuándo. La solicitud vuelve a "pendiente" y el docente ve el motivo en
